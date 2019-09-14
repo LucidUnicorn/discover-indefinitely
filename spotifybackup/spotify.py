@@ -1,9 +1,13 @@
+import time
 from urllib.parse import urlencode
 
 import requests
 
 from spotifybackup.database import DatabaseClient
 from spotifybackup.auth_server import AuthorisationServer
+
+
+ERROR_MSG_TOKEN_EXPIRED = 'The access token expired'
 
 
 class SpotifyClient:
@@ -19,9 +23,18 @@ class SpotifyClient:
             'Authorization': f'Bearer {self._access_token}'
         }
         response = requests.get(f'{self._api_url}{endpoint}', headers=auth_header, params=data)
+        response_data = response.json()
 
         if response.status_code == 200:
-            return response.json()
+            return response_data
+        elif response.status_code == 401 and response_data['error']['message'] == ERROR_MSG_TOKEN_EXPIRED:
+            self._refresh_authorisation()
+            return self._api_query_request(endpoint, data)
+        elif response.status_code == 429:
+            timeout = int(response.headers['Retry-After']) + 10
+            print(f'Rate limited. Waiting: {timeout} seconds')
+            time.sleep(timeout)
+            return self._api_query_request(endpoint, data)
         else:
             # TODO handle request error
             pass
@@ -32,10 +45,18 @@ class SpotifyClient:
             'Content-Type': 'application/json'
         }
         response = requests.post(f'{self._api_url}{endpoint}', headers=headers, json=data)
-        print(response.text)
+        response_data = response.json()
 
         if response.status_code == 200:
-            return response.json()
+            return response_data
+        elif response.status_code == 401 and response_data['error']['message'] == ERROR_MSG_TOKEN_EXPIRED:
+            self._refresh_authorisation()
+            return self._api_update_request(endpoint, data)
+        elif response.status_code == 429:
+            timeout = int(response.headers['Retry-After']) + 10
+            print(f'Rate limited. Waiting: {timeout} seconds')
+            time.sleep(timeout)
+            return self._api_update_request(endpoint, data)
         else:
             # TODO handle request error
             pass
