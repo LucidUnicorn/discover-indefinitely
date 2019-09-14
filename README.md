@@ -29,4 +29,4 @@ You will be presented with a link to the Spotify Accounts service when the appli
 ## Automating
 It is possible to run this application automatically so you don't have to remember to manually execute it each week. Because of the way the Spotify API authorisation works, if you will need to perform the setup process on a device with access to a web browser. 
 
-After you have authorised the application, you can move it to a different, always-on device and use something like CRON to schedule it. You can also use CRON locally if you'd prefer (and are running Linux).
+After you have authorised the application, you can move it to a different device and use something like CRON to schedule it. You can also use CRON locally if you'd prefer (and are running Linux).
