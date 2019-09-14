@@ -1,5 +1,4 @@
 from urllib.parse import urlencode
-from pprint import pprint
 
 import requests
 
@@ -14,7 +13,6 @@ class SpotifyClient:
         self._api_url = 'https://api.spotify.com/v1/'
         self._db_client = DatabaseClient()
         self._access_token = self._db_client.get_value('access_token')
-        self._user_id = None
 
     def _api_query_request(self, endpoint, data=None):
         auth_header = {
@@ -86,4 +84,29 @@ class SpotifyClient:
         return playlists['items']
 
     def make_playlist(self, playlist_name):
-        endpoint = f''
+        endpoint = f'users/{self._get_user_id()}/playlists'
+        data = {
+            'name': playlist_name,
+            'public': False,
+            'collaborative': False,
+            'description': 'A backup of tracks added to Discover Weekly and Release Radar playlists.'
+        }
+
+        return self._api_update_request(endpoint, data)
+
+    def get_playlist_tracks(self, playlist):
+        playlist_id = playlist['id']
+        endpoint = f'playlists/{playlist_id}/tracks'
+        data = {
+            'market': 'from_token'
+        }
+
+        return self._api_query_request(endpoint, data)['items']
+
+    def add_tracks_to_playlist(self, tracks, playlist):
+        playlist_id = playlist['id']
+        endpoint = f'playlists/{playlist_id}/tracks'
+        data = {
+            'uris': tracks
+        }
+        self._api_update_request(endpoint, data)
