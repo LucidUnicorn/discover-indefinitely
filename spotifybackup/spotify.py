@@ -16,11 +16,11 @@ class SpotifyClient:
         self._access_token = self._db_client.get_value('access_token')
         self._user_id = None
 
-    def _api_query_request(self, endpoint):
+    def _api_query_request(self, endpoint, data=None):
         auth_header = {
             'Authorization': f'Bearer {self._access_token}'
         }
-        response = requests.get(f'{self._api_url}{endpoint}', headers=auth_header)
+        response = requests.get(f'{self._api_url}{endpoint}', headers=auth_header, params=data)
 
         if response.status_code == 200:
             return response.json()
