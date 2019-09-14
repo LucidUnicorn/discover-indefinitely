@@ -97,8 +97,25 @@ class SpotifyClient:
                 self._db_client.set_value('refresh_token', response_data['refresh_token'])
                 self._access_token = response_data['access_token']
 
-    def refresh_authorisation(self):
-        pass
+    def _refresh_authorisation(self):
+        refresh_token = self._db_client.get_value('refresh_token')
+
+        if refresh_token is not None:
+            refresh_request_data = {
+                'grant_type': 'refresh_token',
+                'refresh_token': refresh_token
+            }
+            refresh_request_response = requests.post('https://accounts.spotify.com/api/token',
+                                                     data=refresh_request_data,
+                                                     auth=(self._client_id, self._client_secret))
+
+            if refresh_request_response.status_code == 200:
+                response_data = refresh_request_response.json()
+                self._db_client.set_value('access_token', response_data['access_token'])
+                self._access_token = response_data['access_token']
+
+                if 'refresh_token' in response_data:
+                    self._db_client.set_value('refresh_token', response_data['refresh_token'])
 
     def _get_user_id(self):
         return self._api_query_request('me')['id']
