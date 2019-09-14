@@ -135,10 +135,13 @@ class SpotifyClient:
 
         return self._api_update_request(endpoint, data)
 
-    def get_playlist_tracks(self, playlist):
+    def get_playlist_tracks(self, playlist, fields=None, offset=0, limit=100):
         playlist_id = playlist['id']
         endpoint = f'playlists/{playlist_id}/tracks'
         data = {
+            'fields': fields,
+            'offset': offset,
+            'limit': limit,
             'market': 'from_token'
         }
 
