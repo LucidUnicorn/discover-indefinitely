@@ -6,12 +6,29 @@ from spotifybackup.spotify import SpotifyClient
 
 
 def get_playlist(target_playlist, playlists):
+    """
+    Searches for a playlist named `target_playlist` in the list `playlists`.
+
+    :param target_playlist:
+    :param playlists:
+    :return:
+    """
     for playlist in playlists:
         if playlist['name'] == target_playlist:
             return playlist
 
 
 def identify_tracks_to_add(client, source_playlist, destination_playlist):
+    """
+    Examines the track list of `destination_playlist` to determine if tracks in `source_playlist` are present. Tracks
+    from `source_playlist` that are not present in `destination_playlist` are added to a list of tracks to be later
+    added to `destination_playlist`.
+
+    :param client:
+    :param source_playlist:
+    :param destination_playlist:
+    :return:
+    """
     identified_tracks = []
 
     if source_playlist is not None:
@@ -27,6 +44,12 @@ def identify_tracks_to_add(client, source_playlist, destination_playlist):
 
 
 def main(application_config):
+    """
+    Uses the `application_config` to setup the Spotify client establishing an API connection then simply calls functions
+    and API handlers to perform the playlist backup process.
+
+    :param application_config:
+    """
     client = SpotifyClient(application_config['client_id'], application_config['client_secret'])
     playlists = client.get_user_playlists()
     target_playlist = get_playlist('Backups', playlists)

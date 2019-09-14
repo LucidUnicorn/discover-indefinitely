@@ -13,9 +13,20 @@ class DatabaseClient:
         connection.close()
 
     def _connect(self):
+        """
+        Creates and returns a connection to the SQLite database.
+
+        :return:
+        """
         return sqlite3.connect(self._db_path)
 
     def get_value(self, key):
+        """
+        Retrieves the value corresponding with `key` from the database if it is present.
+
+        :param key:
+        :return:
+        """
         connection = self._connect()
 
         with connection:
@@ -31,6 +42,13 @@ class DatabaseClient:
         return config_value[0]
 
     def set_value(self, key, value):
+        """
+        Sets the value of `key` to `value` in the SQLite database. If `key` does not exist it is automatically added and
+        simply updated if it already exists.
+
+        :param key:
+        :param value:
+        """
         connection = self._connect()
 
         with connection:

@@ -20,6 +20,21 @@ class SpotifyClient:
         self._authorise()
 
     def _api_query_request(self, endpoint, data=None):
+        """
+        Performs a GET request against the Spotify API. `endpoint` is used to determine the exact API endpoint required
+        by the calling operation and if `data` is set then it is passed to the request for use as GET parameters. The
+        resulting API response is returned in full.
+
+        If the API response indicates the access token has expired the application will attempt to perform the refresh
+        process automatically.
+
+        If the API response states that the application has been rate limited it will wait for the time state in the
+        `Retry-After` header plus an extra 10 seconds for safety.
+
+        :param endpoint:
+        :param data:
+        :return:
+        """
         auth_header = {
             'Authorization': f'Bearer {self._access_token}'
         }
@@ -42,6 +57,21 @@ class SpotifyClient:
             exit(1)
 
     def _api_update_request(self, endpoint, data):
+        """
+        Performs a POST request against the Spotify API. `endpoint` is used to determine the exact API endpoint required
+        by the calling operation and if `data` is set then it is pass to the request as the JSON body. The resulting API
+        response is returned in full.
+
+        If the API response indicates the access token has expired the application will attempt to perform the refresh
+        process automatically.
+
+        If the API response states that the application has been rate limited it will wait for the time state in the
+        `Retry-After` header plus an extra 10 seconds for safety.
+
+        :param endpoint:
+        :param data:
+        :return:
+        """
         headers = {
             'Authorization': f'Bearer {self._access_token}',
             'Content-Type': 'application/json'
@@ -65,6 +95,12 @@ class SpotifyClient:
             exit(1)
 
     def _authorise(self):
+        """
+        Performs the initial authorisation flow between the application and the Spotify API. The entire flow only has to
+        run when the application is requesting authorisation from a user for the first time. Once the authorisation flow
+        has been complete the application should be able to use the acquired refresh token to automatically maintain the
+        authorised scope.
+        """
         redirect_uri = f'http://localhost:8080/callback'
         token_request_data = {
             'grant_type': 'authorization_code',
@@ -98,6 +134,10 @@ class SpotifyClient:
                 self._access_token = response_data['access_token']
 
     def _refresh_authorisation(self):
+        """
+        Uses the stored refresh token to retrieve an updated access token from the API when the previous token expires.
+        If the API sends a new refresh token it is also updated.
+        """
         refresh_token = self._db_client.get_value('refresh_token')
 
         if refresh_token is not None:
@@ -118,6 +158,11 @@ class SpotifyClient:
                     self._db_client.set_value('refresh_token', response_data['refresh_token'])
 
     def _get_user_id(self):
+        """
+        Queries the API's /me endpoint and returns the authorised user's account ID.
+
+        :return:
+        """
         return self._api_query_request('me')['id']
 
     def get_user_playlists(self):
@@ -125,6 +170,12 @@ class SpotifyClient:
         return playlists['items']
 
     def make_playlist(self, playlist_name):
+        """
+        Creates a new private, non-collaborative playlist named by `playlist_name`.
+
+        :param playlist_name:
+        :return:
+        """
         endpoint = f'users/{self._get_user_id()}/playlists'
         data = {
             'name': playlist_name,
@@ -136,6 +187,22 @@ class SpotifyClient:
         return self._api_update_request(endpoint, data)
 
     def get_playlist_tracks(self, playlist, fields=None, offset=0, limit=100):
+        """
+        Given a `playlist` object from the Spotify API returns the playlist's track list. `fields`, `offset` and `limit`
+        can be specified to tune the query result.
+
+        `fields` should be a valid field query as defined in the Spotify API documentation.
+
+        `offset` is a 0-index value that tells the API which track within the playlist it should start returning from.
+
+        `limit` specifies the maximum number of tracks that should be returned.
+
+        :param playlist:
+        :param fields:
+        :param offset:
+        :param limit:
+        :return:
+        """
         playlist_id = playlist['id']
         endpoint = f'playlists/{playlist_id}/tracks'
         data = {
@@ -148,6 +215,15 @@ class SpotifyClient:
         return self._api_query_request(endpoint, data)['items']
 
     def search_playlist(self, track_id, playlist):
+        """
+        Retrieves the track listing for `playlist` and iteratively searches for `track_id`. If the playlist contains
+        more than 100 tracks the API will be queried multiple times with an incrementing offset value until the entire
+        playlist has been exhausted. If the track is found in the playlist at any point the search it halted.
+
+        :param track_id:
+        :param playlist:
+        :return:
+        """
         offset = 0
         field_query = 'items(track(id))'
         tracks = self.get_playlist_tracks(playlist, fields=field_query)
@@ -163,6 +239,14 @@ class SpotifyClient:
         return False
 
     def add_tracks_to_playlist(self, tracks, playlist):
+        """
+        Takes a list of Spotify track URIs and adds them to `playlist`. The API limits the number of tracks that can be
+        added in a single request, therefore if more than 100 tracks are passed in the list is split up into chunks each
+        containing a maximum of 100 tracks which are then sent to as multiple requests to the API.
+
+        :param tracks:
+        :param playlist:
+        """
         playlist_id = playlist['id']
         endpoint = f'playlists/{playlist_id}/tracks'
         data = {
