@@ -2,7 +2,7 @@ import argparse
 import json
 from pathlib import Path
 
-from spotifybackup.spotify import SpotifyClient
+from discoverindefinitely.spotify import SpotifyClient
 
 
 def get_playlist(target_playlist, playlists):

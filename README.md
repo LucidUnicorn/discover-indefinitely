@@ -1,4 +1,4 @@
-# Spotify Backup
+# Discover Indefinitely
 A tool to automatically backup the tracks in Spotify's Discover Weeky and Release Radar playlists.
 
 ## Setup

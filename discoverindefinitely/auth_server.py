@@ -26,7 +26,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         This server will only run when the callback is required. When hit, the server retrieves the access code from the
         GET parameters and informs the user that they can close the window. The access code is stored by the process
-        manager so it can be retrieved by the `spotifybackup` process.
+        manager so it can be retrieved by the `discoverindefinitely` process.
         """
         if self.path.startswith('/callback'):
             query = urlparse(self.path).query

@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 
 import requests
 
-from spotifybackup.auth_server import AuthorisationServer
-from spotifybackup.database import DatabaseClient
+from discoverindefinitely.auth_server import AuthorisationServer
+from discoverindefinitely.database import DatabaseClient
 
 ERROR_MSG_TOKEN_EXPIRED = 'The access token expired'
 
