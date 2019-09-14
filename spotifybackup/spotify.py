@@ -28,11 +28,13 @@ class SpotifyClient:
             # TODO handle request error
             pass
 
-    def _api_update_requests(self, endpoint, data):
-        auth_header = {
-            'Authorization': f'Bearer {self._access_token}'
+    def _api_update_request(self, endpoint, data):
+        headers = {
+            'Authorization': f'Bearer {self._access_token}',
+            'Content-Type': 'application/json'
         }
-        response = requests.post(f'{self._api_url}{endpoint}', headers=auth_header, data=data)
+        response = requests.post(f'{self._api_url}{endpoint}', headers=headers, json=data)
+        print(response.text)
 
         if response.status_code == 200:
             return response.json()
