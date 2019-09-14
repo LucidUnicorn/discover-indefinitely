@@ -44,6 +44,11 @@ class SpotifyClient:
 
     def authorise(self):
         redirect_uri = f'http://localhost:8080/callback'
+        token_request_data = {
+            'grant_type': 'authorization_code',
+            'code': self._access_token,
+            'redirect_uri': redirect_uri
+        }
 
         if self._access_token is None:
             data = {
@@ -58,23 +63,23 @@ class SpotifyClient:
             print(f'https://accounts.spotify.com/authorize?{query_string}')
 
             auth_server = AuthorisationServer()
-            auth_code = auth_server.start()
+            token_request_data['code'] = auth_server.start()
 
-        token_request_data = {
-            'grant_type': 'authorization_code',
-            'code': self._access_token,
-            'redirect_uri': redirect_uri
-        }
-        token_request_response = requests.post('https://accounts.spotify.com/api/token',
-                                               data=token_request_data,
-                                               auth=(self._client_id, self._client_secret))
+            token_request_response = requests.post('https://accounts.spotify.com/api/token',
+                                                   data=token_request_data,
+                                                   auth=(self._client_id, self._client_secret))
 
-        if token_request_response.status_code == 200:
-            response_data = token_request_response.json()
-            self._db_client.set_value('access_token', response_data['access_token'])
-            self._db_client.set_value('refresh_token', response_data['refresh_token'])
-            self._access_token = response_data['access_token']
-            self._user_id = self._api_query_request('me')['id']
+            if token_request_response.status_code == 200:
+                response_data = token_request_response.json()
+                self._db_client.set_value('access_token', response_data['access_token'])
+                self._db_client.set_value('refresh_token', response_data['refresh_token'])
+                self._access_token = response_data['access_token']
+
+    def refresh_authorisation(self):
+        pass
+
+    def _get_user_id(self):
+        return self._api_query_request('me')['id']
 
     def get_user_playlists(self):
         playlists = self._api_query_request('me/playlists')
