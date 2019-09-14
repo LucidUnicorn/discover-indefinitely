@@ -17,6 +17,7 @@ class SpotifyClient:
         self._api_url = 'https://api.spotify.com/v1/'
         self._db_client = DatabaseClient()
         self._access_token = self._db_client.get_value('access_token')
+        self._authorise()
 
     def _api_query_request(self, endpoint, data=None):
         auth_header = {
@@ -63,7 +64,7 @@ class SpotifyClient:
             print(response.text)
             exit(1)
 
-    def authorise(self):
+    def _authorise(self):
         redirect_uri = f'http://localhost:8080/callback'
         token_request_data = {
             'grant_type': 'authorization_code',
