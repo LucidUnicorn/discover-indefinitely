@@ -25,7 +25,7 @@ class SpotifyClient:
         response = requests.get(f'{self._api_url}{endpoint}', headers=auth_header, params=data)
         response_data = response.json()
 
-        if response.status_code == 200:
+        if response.ok:
             return response_data
         elif response.status_code == 401 and response_data['error']['message'] == ERROR_MSG_TOKEN_EXPIRED:
             self._refresh_authorisation()
@@ -36,8 +36,9 @@ class SpotifyClient:
             time.sleep(timeout)
             return self._api_query_request(endpoint, data)
         else:
-            # TODO handle request error
-            pass
+            print('An unexpected error has occurred')
+            print(response.text)
+            exit(1)
 
     def _api_update_request(self, endpoint, data):
         headers = {
@@ -47,7 +48,7 @@ class SpotifyClient:
         response = requests.post(f'{self._api_url}{endpoint}', headers=headers, json=data)
         response_data = response.json()
 
-        if response.status_code == 200:
+        if response.ok:
             return response_data
         elif response.status_code == 401 and response_data['error']['message'] == ERROR_MSG_TOKEN_EXPIRED:
             self._refresh_authorisation()
@@ -58,8 +59,9 @@ class SpotifyClient:
             time.sleep(timeout)
             return self._api_update_request(endpoint, data)
         else:
-            # TODO handle request error
-            pass
+            print('An unexpected error has occurred')
+            print(response.text)
+            exit(1)
 
     def authorise(self):
         redirect_uri = f'http://localhost:8080/callback'
