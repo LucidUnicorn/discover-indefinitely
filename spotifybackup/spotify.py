@@ -270,7 +270,13 @@ class SpotifyClient:
         """
         playlist_id = playlist['id']
         endpoint = f'playlists/{playlist_id}/tracks'
-        data = {
-            'uris': tracks
-        }
-        self._api_update_request(endpoint, data)
+        iterations = math.ceil(len(tracks) / 100)
+
+        for i in range(iterations):
+            upper_limit = (i + 1) * 100
+            lower_limit = upper_limit - 100
+            track_uris = tracks[lower_limit:upper_limit]
+            data = {
+                'uris': track_uris
+            }
+            self._api_update_request(endpoint, data)
