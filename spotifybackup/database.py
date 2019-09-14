@@ -24,6 +24,10 @@ class DatabaseClient:
             config_value = cursor.fetchone()
 
         connection.close()
+
+        if config_value is None:
+            return config_value
+
         return config_value[0]
 
     def set_value(self, key, value):
