@@ -4,7 +4,9 @@ A tool to automatically backup the tracks in Spotify's Discover Weeky and Releas
 ## Setup
 To get started you just need to clone this repo and create a configuration file. As this application is not hosted you'll also need to create your own Spotify application.
 
-You can install Python dependencies by running `pip install -r requirements.txt`. 
+You can install Python dependencies by running `pip install -r requirements.txt`.
+
+You must be following the Discover Weekly and/or Release Radar playlists for this application to work.
 
 ### Create a Spotify application
 1. Go to the [Spotify for Developers dashboard](https://developer.spotify.com/dashboard/applications).
