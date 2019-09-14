@@ -91,3 +91,4 @@ if __name__ == '__main__':
         configuration = json.load(config)
 
     validate_configuration(configuration)
+    main(configuration)
