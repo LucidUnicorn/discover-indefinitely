@@ -1,11 +1,11 @@
+import math
 import time
 from urllib.parse import urlencode
 
 import requests
 
-from spotifybackup.database import DatabaseClient
 from spotifybackup.auth_server import AuthorisationServer
-
+from spotifybackup.database import DatabaseClient
 
 ERROR_MSG_TOKEN_EXPIRED = 'The access token expired'
 
@@ -165,9 +165,30 @@ class SpotifyClient:
         """
         return self._api_query_request('me')['id']
 
-    def get_user_playlists(self):
-        playlists = self._api_query_request('me/playlists')
-        return playlists['items']
+    def get_user_playlists(self, offset=0, limit=50):
+        """
+        Retrieves all public and private playlists for the authorised user by iteratively calling the API until the all
+        playlists are retrieved or until the maximum offset limit of 100 is exceeded.
+
+        :return:
+        """
+        user_playlists = []
+        data = {
+            'offset': offset,
+            'limit': limit
+        }
+        playlists = self._api_query_request('me/playlists', data)
+
+        while len(playlists['items']) > 0:
+            user_playlists.extend(playlists['items'])
+            data['offset'] += 50
+
+            if data['offset'] > 100:
+                break
+            else:
+                playlists = self._api_query_request('me/playlists', data)
+
+        return user_playlists
 
     def make_playlist(self, playlist_name):
         """
