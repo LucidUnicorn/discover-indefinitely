@@ -66,15 +66,23 @@ def main(application_config):
 
 
 def validate_configuration(application_config):
-    if 'client_id' not in application_config:
-        print('Configuration file must contain client_id')
-        exit(1)
-    elif 'client_secret' not in application_config:
-        print('Configuration file must contain client_secret')
-        exit(1)
-    elif 'destination_playlist' not in application_config:
-        print('Configuration file must contain destination_playlist')
-        exit(1)
+    """
+    Parses the JSON loaded from the configuration file to ensure that the required keys any values are present.
+
+    :param application_config:
+    """
+    required_fields = ['client_id', 'client_secret', 'destination_playlist']
+
+    for field in required_fields:
+        if field not in application_config:
+            print(f'Configuration file must contain {field}')
+            exit(1)
+        elif not isinstance(application_config[field], str):
+            print(f'{field} must be a string')
+            exit(1)
+        elif len(application_config[field]) <= 0:
+            print(f'{field} must have a value')
+            exit(1)
 
 
 if __name__ == '__main__':
