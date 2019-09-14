@@ -105,3 +105,4 @@ venv.bak/
 
 # Project specific
 db.sqlite
+config.json
