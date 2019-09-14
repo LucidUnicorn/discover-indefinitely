@@ -1,5 +1,5 @@
-import json
 import argparse
+import json
 from pathlib import Path
 
 from spotifybackup.spotify import SpotifyClient
@@ -52,12 +52,12 @@ def main(application_config):
     """
     client = SpotifyClient(application_config['client_id'], application_config['client_secret'])
     playlists = client.get_user_playlists()
-    target_playlist = get_playlist('Backups', playlists)
+    target_playlist = get_playlist(application_config['destination_playlist'], playlists)
     discover_weekly_playlist = get_playlist('Discover Weekly', playlists)
     release_radar_playlist = get_playlist('Release Radar', playlists)
 
     if target_playlist is None:
-        target_playlist = client.make_playlist('Backups')
+        target_playlist = client.make_playlist(application_config['destination_playlist'])
 
     tracks_to_add = []
     tracks_to_add.extend(identify_tracks_to_add(client, discover_weekly_playlist, target_playlist))
