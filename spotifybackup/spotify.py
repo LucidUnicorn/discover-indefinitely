@@ -147,6 +147,21 @@ class SpotifyClient:
 
         return self._api_query_request(endpoint, data)['items']
 
+    def search_playlist(self, track_id, playlist):
+        offset = 0
+        field_query = 'items(track(id))'
+        tracks = self.get_playlist_tracks(playlist, fields=field_query)
+
+        while len(tracks) > 0:
+            for track in tracks:
+                if track['track']['id'] == track_id:
+                    return True
+
+            offset += 100
+            tracks = self.get_playlist_tracks(playlist, fields=field_query, offset=offset)
+
+        return False
+
     def add_tracks_to_playlist(self, tracks, playlist):
         playlist_id = playlist['id']
         endpoint = f'playlists/{playlist_id}/tracks'
